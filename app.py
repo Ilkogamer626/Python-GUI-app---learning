@@ -11,7 +11,7 @@ import mutagen.id3
 from mutagen.id3 import ID3, TIT2, TIT3, TALB, TPE1, TRCK, TYER
 import musicbrainzngs
 import glob
-
+import shutil
 import numpy as np
 
 
@@ -64,10 +64,18 @@ def buttonClicked():
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             ydl.download([urlToDownload])
         modifyMetadata()
+        moveSong()
 
 
 button = ttk.Button(root, text='Give me:', command=buttonClicked)
 button.pack()
+
+
+def moveSong():
+    listOfSongs = listFilenames()
+    onlyThisSong = listOfSongs[0]
+    shutil.move(
+        onlyThisSong, 'C:/Users/nasta/Desktop/Projects/Python GUI app - learning/Done')
 
 # function for listing all the filenames in the directory
 
@@ -96,7 +104,7 @@ artistInput.pack()
 
 def findArtist():
     artistName = slugify(artist.get(), separator='%20')
-    artistResponse = musicbrainzngs.search_artists(artistName, 1, strict=True)
+    artistResponse = musicbrainzngs.search_artists(artistName, 1)
     artistToReturn: str = artistResponse['artist-list'][0]['id']
     return artistToReturn
 
@@ -113,7 +121,6 @@ def modifyMetadata():
         musicMetadata['albumartist'] = soonToBeMetadata['releases'][0]['release-group']['title']
         tracknumber = str(soonToBeMetadata['releases'][0]['media'][0]['track'][0]['number']) + \
             '/' + str(soonToBeMetadata['releases'][0]['track-count'])
-        print(tracknumber)
         musicMetadata['tracknumber'] = tracknumber
     musicMetadata.save()
 
