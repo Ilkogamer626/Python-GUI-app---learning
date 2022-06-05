@@ -43,15 +43,13 @@ def buttonClicked():
     writtenText = text.get()
     message.config(text=writtenText)
     if(writtenText):
-        toBeAddedIntoUrl = slugify(writtenText, separator='%20')
+        toBeAddedIntoUrl = slugify(
+            writtenText, separator='%20') + '%20' + slugify(artist.get(), separator='%20')
         httpUrl = f'https://youtube.googleapis.com/youtube/v3/search?part=snippet&q={toBeAddedIntoUrl}&key=AIzaSyCf6bBW5Ujtp1vOF0ycQO6cKtYSUBMa5ps'
         response = requests.get(
             httpUrl)
         responseObject = response.json()
         youtubeId = responseObject["items"][0]['id']['videoId']
-
-        videoId = ttk.Label(root, text=youtubeId)
-        videoId.pack()
 
         # downloading the video
         ydl_opts = {
@@ -88,8 +86,6 @@ def findMetadata():
     foundSomething = requests.get(
         f'https://musicbrainz.org/ws/2/recording?query={musicName}%20AND%20arid:{artistId}&fmt=json&limit=1')
     workWithThis = foundSomething.json()
-    displayLabel = ttk.Label(root, text=workWithThis['recordings'][0])
-    displayLabel.pack()
     return workWithThis['recordings'][0]
 
 
@@ -102,8 +98,6 @@ def findArtist():
     artistName = slugify(artist.get(), separator='%20')
     artistResponse = musicbrainzngs.search_artists(artistName, 1, strict=True)
     artistToReturn: str = artistResponse['artist-list'][0]['id']
-    artistLabel = ttk.Label(root, text=artistToReturn)
-    artistLabel.pack()
     return artistToReturn
 
 
