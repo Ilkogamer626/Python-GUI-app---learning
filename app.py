@@ -14,6 +14,7 @@ import musicbrainzngs
 import glob
 import shutil
 import numpy as np
+import os
 
 
 root = tk.Tk()
@@ -92,10 +93,17 @@ def findMetadata():
 
 
 def findArtist():
-    artistName = slugify(artist.get(), separator='%20')
-    artistResponse = musicbrainzngs.search_artists(artistName, 1)
-    artistToReturn: str = artistResponse['artist-list'][0]['id']
+    artistName = artist.get()
+    artistResponse = musicbrainzngs.search_artists(artistName, 10)
+    artistId = getTheRightArtist(artistResponse['artist-list'], artistName)
+    artistToReturn: str = artistId
     return artistToReturn
+
+
+def getTheRightArtist(artistList, theNameWeAreLookingFor):
+    for n in range(10):
+        if(artistList[n]['name'] == theNameWeAreLookingFor):
+            return artistList[n]['id']
 
 
 def modifyMetadata():
