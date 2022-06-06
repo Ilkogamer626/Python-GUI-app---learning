@@ -1,5 +1,6 @@
 import tkinter as tk
-from tkinter import StringVar, Text, ttk
+from tkinter import E, EW, W, StringVar, Text, ttk
+from turtle import bgcolor
 import requests
 import json
 from types import SimpleNamespace
@@ -19,6 +20,8 @@ root = tk.Tk()
 root.title('Give me!')
 windowWidth = 1200
 windowHeight = 600
+canvas = tk.Canvas(root, width=windowWidth, height=windowHeight)
+canvas.grid(columnspan=6, rowspan=4)
 
 # centering the window
 screenWidth = root.winfo_screenwidth()
@@ -28,20 +31,12 @@ xOffset = int(screenWidth/2 - windowWidth/2)
 yOffset = int(screenHeight/2 - windowHeight/2)
 root.geometry(f'{windowWidth}x{windowHeight}+{xOffset}+{yOffset-100}')
 
-# displaying a message
-message = ttk.Label(root, text="Hello world")
-message.pack()
-musicbrainzngs.set_useragent('GiveMe!', '0.1', contact=None)
 
-# getting input
-text = tk.StringVar(value='')
-inputField = ttk.Entry(root, textvariable=text)
-inputField.pack()
+musicbrainzngs.set_useragent('GiveMe!', '0.1', contact=None)
 
 
 def buttonClicked():
     writtenText = text.get()
-    message.config(text=writtenText)
     if(writtenText):
         toBeAddedIntoUrl = slugify(
             writtenText, separator='%20') + '%20' + slugify(artist.get(), separator='%20')
@@ -50,25 +45,24 @@ def buttonClicked():
             httpUrl)
         responseObject = response.json()
         youtubeId = responseObject["items"][0]['id']['videoId']
-
-        # downloading the video
-        ydl_opts = {
-            'format': 'bestaudio/best',
-            'postprocessors': [{
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
-                'preferredquality': '192',
-            }],
-        }
         urlToDownload = f'https://youtu.be/{youtubeId}'
-        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-            ydl.download([urlToDownload])
+        arrayToPass = [urlToDownload]
+        downloadFromYoutube(arrayToPass)
         modifyMetadata()
         moveSong()
 
 
-button = ttk.Button(root, text='Give me:', command=buttonClicked)
-button.pack()
+def downloadFromYoutube(arrayOfURlsToDownload):
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+                   'preferredcodec': 'mp3',
+                   'preferredquality': '192',
+        }],
+    }
+    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        ydl.download(arrayOfURlsToDownload)
 
 
 def moveSong():
@@ -97,11 +91,6 @@ def findMetadata():
     return workWithThis['recordings'][0]
 
 
-artist = StringVar(value='')
-artistInput = ttk.Entry(root, textvariable=artist)
-artistInput.pack()
-
-
 def findArtist():
     artistName = slugify(artist.get(), separator='%20')
     artistResponse = musicbrainzngs.search_artists(artistName, 1)
@@ -123,6 +112,22 @@ def modifyMetadata():
             '/' + str(soonToBeMetadata['releases'][0]['track-count'])
         musicMetadata['tracknumber'] = tracknumber
     musicMetadata.save()
+
+
+button = tk.Button(root, text='Give me:',
+                   command=buttonClicked, bg='#599e7e', fg='#ffffff', width=20)
+button.grid(column=1, row=1)
+
+text = tk.StringVar(value='')
+inputField = ttk.Entry(root, textvariable=text, width=30)
+inputField.grid(column=2, row=1, sticky=EW,)
+
+fromLabel = ttk.Label(root, text='By')
+fromLabel.grid(column=3, row=1)
+
+artist = StringVar(value='')
+artistInput = ttk.Entry(root, textvariable=artist, width=30)
+artistInput.grid(column=4, row=1, sticky=EW,)
 
 
 root.mainloop()
