@@ -48,9 +48,9 @@ def buttonClicked():
         youtubeId = responseObject["items"][0]['id']['videoId']
         urlToDownload = f'https://youtu.be/{youtubeId}'
         arrayToPass = [urlToDownload]
-        downloadFromYoutube(arrayToPass)
+        # downloadFromYoutube(arrayToPass)
         modifyMetadata()
-        moveSong()
+        # moveSong()
 
 
 def downloadFromYoutube(arrayOfURlsToDownload):
@@ -120,6 +120,12 @@ def modifyMetadata():
             '/' + str(soonToBeMetadata['releases'][0]['track-count'])
         musicMetadata['tracknumber'] = tracknumber
     musicMetadata.save()
+    splitStr = hopefullyOnlyThisSong.split('\\')
+    splitStr.reverse()
+    splitStr[0] = f'{musicMetadata["title"][0]}.mp3'
+    splitStr.reverse()
+    destStr = '\\'.join(x for x in splitStr)
+    os.rename(hopefullyOnlyThisSong, destStr)
 
 
 button = tk.Button(root, text='Give me:',
